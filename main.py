@@ -1,14 +1,17 @@
 #%%
-from carfollow import Tampere, W_I, U_I, K_X
+from carfollow import IDM, Tampere, W_I, U_I, K_X
 import numpy as np
 
 #%%
 from plotf import plot_trj
 from bokeh.plotting import figure, show
+from bokeh.io import output_notebook
 from bokeh.layouts import row
 
+output_notebook()
+
 #%%
-N = 2  # 50
+N = 50  # 50
 
 # Declaring Initial position and initial speed
 X0 = np.flip(np.arange(0, N) * (W_I + U_I) / (W_I * K_X))
@@ -28,7 +31,7 @@ for i in range(1, N):
 
 #%%
 time = np.arange(360)
-
+ 
 # Sinusoidal signal profile
 lead_acc = np.sin(2 * np.pi * 1 / 60 * (time)) * np.concatenate(
     (np.zeros(90), np.ones(60), np.zeros(90), np.zeros(120))
