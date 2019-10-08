@@ -47,9 +47,16 @@ lead_acc = np.sin(2 * np.pi * 1 / 60 * (time)) * np.concatenate(
     (np.zeros(90), np.ones(60), np.zeros(90), np.zeros(120))
 )
 
+# Speed Control Test
+vit_control = 1 - (1 / (1 + np.exp(-(time - 200) / 10)))
+vit_control = 20 + 5 * (vit_control - 0.5)
+
 leader = figure(title="Leader's acceleration", plot_height=500, plot_width=500)
 leader.line(time, lead_acc)
 
+spdlimit = figure(title="Speed Control", plot_height=500, plot_width=500)
+spdlimit.line(time, vit_control)
+# show(spdlimit)
 
 #%%
 # Matrix info storage
@@ -66,9 +73,12 @@ A = A0
 # BS = BS0
 
 
-for u in lead_acc:
+for u, sl in zip(lead_acc, vit_control):
     for veh in veh_list:
-        veh.step_evolution(v_d=U_I, control=u)
+        if veh.idx in (10, 30, 50):
+            veh.step_evolution(v_d=sl, control=u)
+        else:
+            veh.step_evolution(v_d=U_I, control=u)
 
     V = np.vstack((V, np.array([veh.v for veh in veh_list])))
     X = np.vstack((X, np.array([veh.x for veh in veh_list])))
