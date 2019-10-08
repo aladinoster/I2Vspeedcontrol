@@ -19,9 +19,9 @@ T_E = 0.2
 S_0 = 1 / K_X
 
 # TAMPERE MODEL
-C_1 = 0.2  # Speed difference coefficient
-C_2 = 0.2  # Spacing coefficient
-C_3 = 0.1  # Tampere coefficient
+C_1 = 0.5  # Speed difference coefficient
+C_2 = 0.5  # Spacing coefficient
+C_3 = 0.5  # Tampere coefficient
 
 # IDM MODEL
 B = 1.5
@@ -83,7 +83,7 @@ class CarFollowLaw(Vehicle):
             Determine current delta of speed
         """
         if self.veh_lead:
-            return self.vl - self.v
+            return self.vl - self.v_t
         return 0
 
     @property
@@ -99,7 +99,7 @@ class CarFollowLaw(Vehicle):
             Determine current spacing (X_n-1 - X_n)
         """
         if self.veh_lead:
-            return self.xl - self.x
+            return self.xl - self.x_t
         return 0
 
     @property
@@ -113,9 +113,9 @@ class CarFollowLaw(Vehicle):
         """
             Use this method to a single step in the simulation
         """
+        self.shift_state()  # x_{k-1} = x{k} move info from last time step into current
         self.control = control  # Update control
         self.car_following(v_d)  # Update acceleration
-        self.shift_state()  # x_{k-1} = x{k} move info from last time step into current
 
 
 # IDM Car Following Model
@@ -200,9 +200,9 @@ class Tampere(CarFollowLaw):
 
     __slots__ = ["_c1", "_c2", "_c3"]
 
-    def __init__(self, x0: float, v0: float, veh_lead=None) -> None:
+    def __init__(self, x0: float, v0: float, veh_lead=None, **kwargs) -> None:
         super().__init__(x0, v0, veh_lead, self.__class__.__name__)
-        self.set_values()
+        self.set_parameters(**kwargs)
 
     @property
     def c1(self) -> float:
@@ -237,11 +237,14 @@ class Tampere(CarFollowLaw):
     def c3(self, value: float = C_3) -> None:
         self._c3 = value
 
-    def set_values(self):
-        self.c1 = C_1
-        self.c2 = C_2
-        self.c3 = C_3
-        
+    def set_parameters(self, c1=C_1, c2=C_2, c3=C_3) -> None:
+        """
+            Set default parameters
+        """
+        self.c1 = c1
+        self.c2 = c2
+        self.c3 = c3
+
     @property
     def s_d(self) -> float:
         """
