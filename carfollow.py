@@ -24,9 +24,11 @@ C_2 = 0.5  # Spacing coefficient
 C_3 = 0.5  # Tampere coefficient
 
 # IDM MODEL
-B = 1.5
-DELTA = 4
+A_MAX = 1  # Max accel
+B = 1.67  # Max decel
+DELTA = 4  # Exponent
 V_0 = 25  # 90 / 3.6
+S_0IDM = 2
 
 # ===============================================================================
 # Clases
@@ -126,17 +128,29 @@ class IDM(CarFollowLaw):
         Intelligent Driver's Model Car Following 
     """
 
-    __slots__ = ["_b", "_delta", "_v0"]
+    __slots__ = ["_b", "_delta", "_amax"]
 
-    def __init__(self, x0: float, v0: float, veh_lead=None) -> None:
+    def __init__(self, x0: float, v0: float, veh_lead=None, **kwargs) -> None:
         super().__init__(x0, v0, veh_lead, self.__class__.__name__)
+        self.set_parameters(**kwargs)
+
+    @property
+    def a_max(self) -> float:
+        """
+            Comfortable decceleration
+        """
+        return self._amax
+
+    @a_max.setter
+    def a_max(self, value: float = A_MAX) -> None:
+        self._amax = value
 
     @property
     def b(self) -> float:
         """
             Comfortable decceleration
         """
-        return B
+        return self._b
 
     @b.setter
     def b(self, value: float = B) -> None:
@@ -154,25 +168,48 @@ class IDM(CarFollowLaw):
         self._delta = value
 
     @property
-    def v0(self) -> float:
+    def s0(self):
+        """ Minimum distance
         """
-            Desired speed
-        """
-        return self._v0
+        return S_0IDM
 
-    @v0.setter
-    def v0(self, value: float = V_0) -> float:
-        self._v0 = value
+    def set_parameters(self, a_max=A_MAX, b=B, delta=DELTA) -> None:
+        """
+            Set default parameters
+        """
+        self.a_max = a_max
+        self.b = b
+        self.delta = delta
 
-    def s_star(self) -> float:
+    def break_strategy(self) -> float:
         """
-            Desired spacing 
+            BS: v * dv / (2 (a*b)^(1/2))
         """
-        return self.s0 + max(0, self.v * self.T + (self.v * self.dv) / (2 * sqrt(self.a * self.b)))
+        return (self.v_t * self.dv) / (2 * sqrt(self.a_max * self.b))
+
+    def s_d(self) -> float:
+        """
+            s0 + max(vT+BS)
+        """
+        return self.s0 + max(0, self.v_t * self.T + self.break_strategy())
+
+    def t1(self, vd: float = V_0) -> float:
+        """
+            (v/vd)^d
+        """
+        return (self.v_t / vd) ** self.delta
+
+    def t2(self) -> float:
+        """
+            (sd(v,dv)/s)^2
+        """
+        return (self.s_d() / self.s) ** 2
 
     def acel(self, vd) -> float:
-
-        return self.a * (1 - (self.v / self.v0) ** self.delta - (self.s_star() / self.s) ** 2)
+        """
+            Vehicle acceleration
+        """
+        return self.a_max * (1 - self.t1() - self.t2())
 
     def car_following(self, vd: float) -> None:
         """ 
@@ -250,7 +287,7 @@ class Tampere(CarFollowLaw):
         """
             Determine desired spacing  (d + gamma * v )
         """
-        return self.s0 + 1 / (self.w * self.k_x) * self.v
+        return self.s0 + 1 / (self.w * self.k_x) * self.v_t
 
     def cong_acc(self) -> float:
         """
