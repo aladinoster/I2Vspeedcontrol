@@ -47,6 +47,7 @@ class CarFollowLaw(Vehicle):
     def __init__(self, x0: float, v0: float, veh_lead=None, behavior: str = None) -> None:
         super().__init__(x0, v0, veh_lead)
         self.behavior = behavior
+        self.acc = False
 
     @property
     def u(self) -> float:
@@ -134,6 +135,7 @@ class CarFollowLaw(Vehicle):
             This registers an external control signal into the vehicle behavior
         """
         self.vd = iter(control)
+        self.acc = True
 
     def step_evolution(self, control: float = 0) -> None:
         """

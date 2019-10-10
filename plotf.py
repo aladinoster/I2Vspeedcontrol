@@ -1,7 +1,7 @@
 from bokeh.plotting import figure, show
 from bokeh.layouts import row
 from bokeh.io import output_notebook
-from bokeh.palettes import Viridis256, Set1
+from bokeh.palettes import Viridis256
 from bokeh.transform import linear_cmap
 from bokeh.models import ColumnDataSource, ColorBar
 import numpy as np

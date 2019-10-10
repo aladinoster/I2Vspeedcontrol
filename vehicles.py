@@ -37,15 +37,19 @@ class Vehicle(object):
         
     """
 
-    idx = count(0)  # Vehicle ID
+    _idx = count(0)  # Vehicle ID
 
-    def __init__(self, init_pos: float, init_spd: float, veh_lead=None) -> None:
+    __slots__ = ["x_t", "v_t", "a_t", "a", "control", "_veh_lead", "idx", "type"]
+
+    def __init__(
+        self, init_pos: float, init_spd: float, veh_type: str = "HDV", veh_lead=None
+    ) -> None:
         """ 
             Initialization of vehicle state
         """
         # Veh info
-        self.idx = next(self.__class__.idx)
-
+        self.idx = next(self.__class__._idx)
+        self.type = veh_type
         # Veh state description
 
         # x: position,
