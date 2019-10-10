@@ -55,14 +55,6 @@ X = X0
 V = V0
 A = A0
 
-# Tests IDM
-# T1 = T10
-# T2 = T20
-# DV = DV0
-# S = S0
-# SD = SD0
-# BS = BS0
-
 
 for u, sl in zip(lead_acc, vit_control):
     for veh in veh_list:
