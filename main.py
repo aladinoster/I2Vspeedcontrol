@@ -18,15 +18,6 @@ X0 = np.flip(np.arange(0, N) * (W_I + U_I) / (W_I * K_X))
 V0 = np.ones(N) * U_I
 A0 = np.zeros(N)
 
-# Tests IDM
-# DV0 = np.zeros(N)
-# S0 = np.zeros(N)
-# SD0 = np.zeros(N)
-# T10 = np.zeros(N)
-# T20 = np.zeros(N)
-# BS0 = np.zeros(N)
-
-
 veh_list = []
 
 # Initializing vehicles
@@ -84,26 +75,11 @@ for u, sl in zip(lead_acc, vit_control):
     X = np.vstack((X, np.array([veh.x for veh in veh_list])))
     A = np.vstack((A, np.array([veh.a for veh in veh_list])))
 
-    # Tests IDM
-    # DV = np.vstack((DV, np.array([veh.dv for veh in veh_list])))
-    # S = np.vstack((S, np.array([veh.s for veh in veh_list])))
-    # SD = np.vstack((SD, np.array([veh.s_d() for veh in veh_list])))
-    # BS = np.vstack((BS, np.array([veh.break_strategy() for veh in veh_list])))
-    # T1 = np.vstack((T1, np.array([veh.t1() for veh in veh_list])))
-    # T2 = np.vstack((T2, np.array([veh.t2() for veh in veh_list])))
 
 ##%%
 pos = plot_trj(time, X, V, "Position")
 spd = plot_trj(time, V, V, "Speed")
 acc = plot_trj(time, A, V, "Acceleration")
-
-# Tests IDM
-# deltav = plot_trj(time, DV, V, "Delta V")
-# headway = plot_trj(time, S, V, "Headway")
-# dheadway = plot_trj(time, SD, V, "Desired headway")
-# breaking = plot_trj(time, BS, V, "Breaking")
-# t1 = plot_trj(time, T1, V, "Term 1")
-# t2 = plot_trj(time, T2, V, "Term 2")
 
 show(
     column(
