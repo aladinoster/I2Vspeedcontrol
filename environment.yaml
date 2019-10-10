@@ -13,3 +13,5 @@ dependencies:
   - numpy
   - bokeh
   - pylint
+  - pandas
+  - ipympl
