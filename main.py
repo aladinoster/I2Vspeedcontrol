@@ -1,10 +1,10 @@
 #%%
-from carfollow import IDM, Tampere, W_I, U_I, K_X
-from support import leader_congestion_pattern
+from carfollow import Tampere, W_I, U_I, K_X
+from support import leader_congestion_pattern, speed_change
 import numpy as np
 
 #%%
-from plotf import plot_trj, plot_leader_acc
+from plotf import plot_single_trace, plot_xva
 from bokeh.plotting import figure, show, output_file
 from bokeh.io import output_notebook
 from bokeh.layouts import row, column
@@ -12,7 +12,10 @@ from bokeh.layouts import row, column
 # output_notebook()
 
 #%%
-N = 100  # 50
+# Constants
+N = 10  # 50
+T_TOTAL = 720  # Simulation time
+SHIFT_CONG = 450  # Congestion shift
 
 # Declaring Initial position and initial speed
 X0 = np.flip(np.arange(0, N) * (W_I + U_I) / (W_I * K_X))
@@ -32,22 +35,18 @@ for i in range(1, N):
 
 
 #%%
-time = np.arange(360)
 
-# Sinusoidal signal profile
-lead_acc = np.sin(2 * np.pi * 1 / 60 * (time)) * np.concatenate(
-    (np.zeros(90), np.ones(60), np.zeros(90), np.zeros(120))
+time = np.arange(T_TOTAL)
+
+# Leader Profile
+
+lead_acc = leader_congestion_pattern(time, shift=SHIFT_CONG)
+leader = plot_single_trace(
+    time, lead_acc, "Leaders' acceleration", "Time [secs]", "Acceleration [m/s²]"
 )
 
 #%%
-# Speed Control Test
-vit_control = 1 - (1 / (1 + np.exp(-(time - 200) / 10)))
-vit_control = 20 + 5 * (vit_control - 0.5)
 
-
-spdlimit = figure(title="Speed Control", plot_height=500, plot_width=500)
-spdlimit.line(time, vit_control)
-# show(spdlimit)
 
 #%%
 # Matrix info storage
@@ -56,12 +55,9 @@ V = V0
 A = A0
 
 
-for u, sl in zip(lead_acc, vit_control):
+for u in lead_acc:
     for veh in veh_list:
-        if veh.idx in (10, 30, 50):
-            veh.step_evolution(v_d=sl, control=u)
-        else:
-            veh.step_evolution(v_d=U_I, control=u)
+        veh.step_evolution(control=u)
 
     V = np.vstack((V, np.array([veh.v for veh in veh_list])))
     X = np.vstack((X, np.array([veh.x for veh in veh_list])))
@@ -69,19 +65,9 @@ for u, sl in zip(lead_acc, vit_control):
 
 
 #%%
-pos = plot_trj(time, X, V, "Position")
-spd = plot_trj(time, V, V, "Speed")
-acc = plot_trj(time, A, V, "Acceleration")
-
-show(
-    column(
-        row(leader, pos),
-        row(spd, acc),
-        # row(deltav, breaking),
-        # row(headway, dheadway),
-        # row(t1, t2)
-    )
-)
+output_file("Summary.html", title="Summary Test")
+pos, spd, acc = plot_xva(time, X, V, A)
+show(column(row(leader, pos), row(spd, acc)))
 
 
 #%%

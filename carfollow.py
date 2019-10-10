@@ -30,6 +30,10 @@ DELTA = 4  # Exponent
 V_0 = 25  # 90 / 3.6
 S_0IDM = 2
 
+# Random component
+np.random.seed(1)
+SIGMA_A = 0.05
+
 # ===============================================================================
 # Clases
 # ===============================================================================
@@ -111,16 +115,136 @@ class CarFollowLaw(Vehicle):
         """
         return DT
 
-    def step_evolution(self, v_d: float, control: float = 0) -> None:
+    @property
+    def vd(self):
+        """
+            Vehicle desired speed
+        """
+        try:
+            return next(self._vd)
+        except (StopIteration, AttributeError):
+            return U_I
+
+    @vd.setter
+    def vd(self, control):
+        self._vd = control
+
+    def register_control_speed(self, control):
+        """
+            This registers an external control signal into the vehicle behavior
+        """
+        self.vd = iter(control)
+
+    def step_evolution(self, control: float = 0) -> None:
         """
             Use this method to a single step in the simulation
         """
         self.shift_state()  # x_{k-1} = x{k} move info from last time step into current
         self.control = control  # Update control
-        self.car_following(v_d)  # Update acceleration
+        self.car_following()  # Update acceleration
 
 
+# ===============================================================================
+# Tampere Car Following Model
+# ===============================================================================
+
+
+class Tampere(CarFollowLaw):
+    """
+        Tampere Car Following Model
+    """
+
+    __slots__ = ["_c1", "_c2", "_c3"]
+
+    def __init__(self, x0: float, v0: float, veh_lead=None, **kwargs) -> None:
+        super().__init__(x0, v0, veh_lead, self.__class__.__name__)
+        self.set_parameters(**kwargs)
+
+    @property
+    def c1(self) -> float:
+        """
+            Speed difference coefficient
+        """
+        return self._c1
+
+    @property
+    def c2(self) -> float:
+        """
+            Spacing coefficient
+        """
+        return self._c2
+
+    @property
+    def c3(self) -> float:
+        """        
+            Tampere coefficient
+        """
+        return self._c3
+
+    @c1.setter
+    def c1(self, value: float = C_1) -> None:
+        self._c1 = value
+
+    @c2.setter
+    def c2(self, value: float = C_2) -> None:
+        self._c2 = value
+
+    @c3.setter
+    def c3(self, value: float = C_3) -> None:
+        self._c3 = value
+
+    def set_parameters(self, c1=C_1, c2=C_2, c3=C_3) -> None:
+        """
+            Set default parameters
+        """
+        self.c1 = c1
+        self.c2 = c2
+        self.c3 = c3
+
+    @property
+    def s_d(self) -> float:
+        """
+            Determine desired spacing  (d + gamma * v )
+        """
+        return self.s0 + 1 / (self.w * self.k_x) * self.v_t
+
+    def cong_acc(self) -> float:
+        """
+            Breaking term  c_1 (D V) + c_2 (s - s_d)
+        """
+        return self.c1 * self.dv + self.c2 * (self.s - self.s_d)
+
+    def free_acc(self) -> float:
+        """
+            Acceleration term (Tampere) c_3 (v_d - v)
+        """
+        return self.c3 * (self.vd - self.v_t)
+
+    def acel(self) -> float:
+        """
+            Acceleration term 
+        """
+        return min(self.cong_acc(), self.free_acc())
+
+    def car_following(self) -> None:
+        """ 
+            Acceleration car following 
+            
+            Note: 
+                if leader 
+                    min(cong_acc, free_acc) -> Tampere
+                else 
+                    manual acceleration
+        """
+        if self.veh_lead:
+            self.a = self.acel() + np.random.normal(0, SIGMA_A)  # Car following
+        else:
+            self.a = self.control  # Leader vehicle 2nd order
+
+
+# ===============================================================================
 # IDM Car Following Model
+# ===============================================================================
 
 
 class IDM(CarFollowLaw):
@@ -210,102 +334,6 @@ class IDM(CarFollowLaw):
             Vehicle acceleration
         """
         return self.a_max * (1 - self.t1() - self.t2())
-
-    def car_following(self, vd: float) -> None:
-        """ 
-            Acceleration car following 
-            
-            Note: 
-                if leader 
-                    min(cong_acc, free_acc) -> Tampere
-                else 
-                    manual acceleration
-        """
-        if self.veh_lead:
-            self.a = self.acel(vd)  # Car following
-        else:
-            self.a = self.control  # Leader vehicle 2nd order
-
-
-# Tampere Car Following Model
-
-
-class Tampere(CarFollowLaw):
-    """
-        Tampere Car Following Model
-    """
-
-    __slots__ = ["_c1", "_c2", "_c3"]
-
-    def __init__(self, x0: float, v0: float, veh_lead=None, **kwargs) -> None:
-        super().__init__(x0, v0, veh_lead, self.__class__.__name__)
-        self.set_parameters(**kwargs)
-
-    @property
-    def c1(self) -> float:
-        """
-            Speed difference coefficient
-        """
-        return self._c1
-
-    @property
-    def c2(self) -> float:
-        """
-            Spacing coefficient
-        """
-        return self._c2
-
-    @property
-    def c3(self) -> float:
-        """        
-            Tampere coefficient
-        """
-        return self._c3
-
-    @c1.setter
-    def c1(self, value: float = C_1) -> None:
-        self._c1 = value
-
-    @c2.setter
-    def c2(self, value: float = C_2) -> None:
-        self._c2 = value
-
-    @c3.setter
-    def c3(self, value: float = C_3) -> None:
-        self._c3 = value
-
-    def set_parameters(self, c1=C_1, c2=C_2, c3=C_3) -> None:
-        """
-            Set default parameters
-        """
-        self.c1 = c1
-        self.c2 = c2
-        self.c3 = c3
-
-    @property
-    def s_d(self) -> float:
-        """
-            Determine desired spacing  (d + gamma * v )
-        """
-        return self.s0 + 1 / (self.w * self.k_x) * self.v_t
-
-    def cong_acc(self) -> float:
-        """
-            Breaking term  c_1 (D V) + c_2 (s - s_d)
-        """
-        return self.c1 * self.dv + self.c2 * (self.s - self.s_d)
-
-    def free_acc(self, vd: float = U_I) -> float:
-        """
-            Acceleration term (Tampere) c_3 (v_d - v)
-        """
-        return self.c3 * (vd - self.v_t)
-
-    def acel(self, vd) -> float:
-        """
-            Acceleration term 
-        """
-        return min(self.cong_acc(), self.free_acc(vd))
 
     def car_following(self, vd: float) -> None:
         """ 
