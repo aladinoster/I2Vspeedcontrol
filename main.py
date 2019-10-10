@@ -1,14 +1,15 @@
 #%%
 from carfollow import IDM, Tampere, W_I, U_I, K_X
+from support import leader_congestion_pattern
 import numpy as np
 
 #%%
-from plotf import plot_trj
-from bokeh.plotting import figure, show
+from plotf import plot_trj, plot_leader_acc
+from bokeh.plotting import figure, show, output_file
 from bokeh.io import output_notebook
 from bokeh.layouts import row, column
 
-output_notebook()
+# output_notebook()
 
 #%%
 N = 100  # 50
@@ -38,12 +39,11 @@ lead_acc = np.sin(2 * np.pi * 1 / 60 * (time)) * np.concatenate(
     (np.zeros(90), np.ones(60), np.zeros(90), np.zeros(120))
 )
 
+#%%
 # Speed Control Test
 vit_control = 1 - (1 / (1 + np.exp(-(time - 200) / 10)))
 vit_control = 20 + 5 * (vit_control - 0.5)
 
-leader = figure(title="Leader's acceleration", plot_height=500, plot_width=500)
-leader.line(time, lead_acc)
 
 spdlimit = figure(title="Speed Control", plot_height=500, plot_width=500)
 spdlimit.line(time, vit_control)
@@ -76,7 +76,7 @@ for u, sl in zip(lead_acc, vit_control):
     A = np.vstack((A, np.array([veh.a for veh in veh_list])))
 
 
-##%%
+#%%
 pos = plot_trj(time, X, V, "Position")
 spd = plot_trj(time, V, V, "Speed")
 acc = plot_trj(time, A, V, "Acceleration")
