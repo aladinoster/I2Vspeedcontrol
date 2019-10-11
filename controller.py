@@ -27,32 +27,31 @@ class SimulationControl:
 
     def __init__(self, traffic_network, time_total):
         self.tfnet = traffic_network
-        self.time_iterator = T_TOTAL 
+        self.time_iterator = T_TOTAL
 
     def set_demand(self, demand):
         self._dmd = demand
 
     @property
-    def t_s(self)->int:
+    def t_s(self) -> int:
         """ Current time step"""
         return next(self._tsim)
-    
+
     @property
-    def time_iterator(self)-> Iterator[int]:
+    def time_iterator(self) -> Iterator[int]:
         """ Iterator in"""
         return self._tsim
 
     @time_iterator.setter
-    def time_iterator(self, value=T_TOTAL)->None:
+    def time_iterator(self, value=T_TOTAL) -> None:
         self._tsim = iter(range(T_TOTAL))
 
     def run_simulation(self):
         """ Execute a traffic simulator"""
-        for i in time_iterator
-        self.
-        for link in self.tfnet:
-            .solve_merges()
-
+        for i in self.time_iterator:
+            self.solve_merges()
+            for link in self.tfnet:
+                link.evolve_step()
 
         # for t, u in zip(time, lead_acc):
         #     for veh in veh_list:
