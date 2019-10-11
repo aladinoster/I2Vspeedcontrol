@@ -6,7 +6,7 @@
 # Imports
 # ===============================================================================
 
-from itertools import count
+from itertools import count, repeat
 from collections import deque
 
 import networkx as nx
