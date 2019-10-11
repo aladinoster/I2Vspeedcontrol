@@ -14,3 +14,4 @@ dependencies:
   - pylint
   - pandas
   - ipympl
+  - networkx

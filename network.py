@@ -46,17 +46,35 @@ class TrafficLane:
 
 class TrafficLink:
 
-    __slots__ = ["_lanes", "idx"]
+    __slots__ = ["_lanes", "__lro", "idx"]
     __idx = count(0)  # Vehicle ID
 
     def __init__(self, length: float = L_MAX, n_lanes: int = 1) -> None:
         self.idx = next(self.__class__.__idx)
         self._lanes = tuple(TrafficLane(length) for n in range(n_lanes))
+        self.__lro = set(lk.idx for lk in self._lanes)
+
+    @property
+    def lane_order(self):
+        """ Link resolution order"""
+        return self.__lro
+
+    @lane_order.setter
+    def lane_order(self, lro):
+        """ lro stands for link resolution order"""
+        self.__lro = lro
+
+    def __iter__(self):
+        """Iter protocol"""
+        return iter(self.lane_order)
+
+    def __next__(self):
+        yield next(self.lane_order)
 
 
 class TrafficNetwork:
 
-    __slots__ = ["_links", "_lro", "idx"]
+    __slots__ = ["_links", "__lro", "idx"]
     __idx = count(0)  # Vehicle ID
 
     def __init__(self, lengthslinks: list = [L_MAX], laneslinks: list = [1]) -> None:
@@ -64,7 +82,7 @@ class TrafficNetwork:
         self._links = tuple(
             TrafficLink(length, lanes) for length, lanes in zip(lengthslinks, laneslinks)
         )
-        self._lro = set(lk.idx for lk in self._links)
+        self.__lro = (lk.idx for lk in self._links)
 
     def set_physical_connection(self, matrix_linkid):
         pass
@@ -72,16 +90,16 @@ class TrafficNetwork:
     @property
     def link_order(self):
         """ Link resolution order"""
-        return self._lro
+        return self.__lro
 
     @link_order.setter
     def link_order(self, lro):
         """ lro stands for link resolution order"""
-        self._lro = lro
+        self.__lro = lro
 
     def __iter__(self):
         """Iter protocol"""
-        return iter(self.link_order)
+        return self.link_order
 
     def __next__(self):
         yield next(self.link_order)
@@ -92,6 +110,3 @@ class ScenarioCase(TrafficNetwork):
 
     def __init__(self):
         pass
-
-
-
