@@ -40,10 +40,15 @@ class Vehicle(object):
     _idx = count(0)  # Vehicle ID
     lid = 0
 
-    __slots__ = ["x_t", "v_t", "a_t", "l_t","a", "control", "_veh_lead", "idx", "type"]
+    __slots__ = ["x_t", "v_t", "a_t", "l_t", "a", "control", "_veh_lead", "idx", "type"]
 
     def __init__(
-        self, init_pos: float, init_spd: float, lane:float, veh_type: str = "HDV", veh_lead=None
+        self,
+        init_pos: float,
+        init_spd: float,
+        init_lane: float,
+        veh_type: str = "HDV",
+        veh_lead=None,
     ) -> None:
         """ 
             Initialization of vehicle state
@@ -65,7 +70,7 @@ class Vehicle(object):
         self.v_t = init_spd
         self.a_t = 0.0
 
-        self.l_t = lane
+        self.l_t = init_lane
 
         # Control acceleration (leader only)
         self.a = 0.0

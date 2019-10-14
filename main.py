@@ -12,7 +12,7 @@ from bokeh.layouts import row, column
 
 #%%
 # Constants
-N = 50  # 50
+N = 200  # 50
 T_TOTAL = 720  # Simulation time
 time = np.arange(T_TOTAL)  # Time vector
 
@@ -32,7 +32,7 @@ T_ACCEPT = T_ACCEPT[(T_ACCEPT > 0) & (T_ACCEPT < SHIFT_CONG)]
 T_ACCEPT = np.random.choice(T_ACCEPT, N)
 
 # Vehicle Initial position / speed
-Q_PERC = 0.5  # [0,1] Reduces flow, at 1 there's capacity.
+Q_PERC = 1  # [0,1] Reduces flow, at 1 there's capacity.
 X0 = np.flip(np.arange(0, N) * (W_I + U_I) / (W_I * K_X) * Q_PERC)
 V0 = np.ones(N) * U_I
 A0 = np.zeros(N)
@@ -42,7 +42,7 @@ veh_list = []
 # Initializing vehicles
 Tampere.reset()
 for x0, v0, vtype in zip(X0, V0, V_CLASS):
-    veh_list.append(Tampere(x0, v0, 0 , vtype))
+    veh_list.append(Tampere(x0=x0, v0=v0, l0=0, veh_type=vtype))
 
 # Setting leader for vehicle i
 for i in range(1, N):
@@ -60,7 +60,7 @@ leader = plot_single_trace(
 # Speed Selection
 acc = U_I + speed_change(time, SPEED_REDUCTION, 100)
 spd_chg = plot_single_trace(time, acc, "Speed reduction", "Time [secs]", "Speed [m/s]")
-show(spd_chg)
+# show(spd_chg)
 
 #%%
 # Matrix info storage
