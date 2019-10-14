@@ -44,8 +44,8 @@ class CarFollowLaw(Vehicle):
         Generic Car Following Behavior
     """
 
-    def __init__(self, x0: float, v0: float, veh_lead=None, behavior: str = None) -> None:
-        super().__init__(x0, v0, veh_lead)
+    def __init__(self, x0: float, v0: float,l0:float, veh_lead=None, behavior: str = None) -> None:
+        super().__init__(x0, v0, l0, veh_lead)
         self.behavior = behavior
         self.acc = False
 
@@ -158,7 +158,7 @@ class Tampere(CarFollowLaw):
 
     __slots__ = ["_c1", "_c2", "_c3"]
 
-    def __init__(self, x0: float, v0: float, veh_lead=None, **kwargs) -> None:
+    def __init__(self, x0: float, v0: float,l0:float, veh_lead=None, **kwargs) -> None:
         super().__init__(x0, v0, veh_lead, self.__class__.__name__)
         self.set_parameters(**kwargs)
 
