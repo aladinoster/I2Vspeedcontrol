@@ -3,7 +3,7 @@ from bokeh.layouts import row
 from bokeh.io import output_notebook
 from bokeh.palettes import Viridis256
 from bokeh.transform import linear_cmap
-from bokeh.models import ColumnDataSource, ColorBar
+from bokeh.models import ColumnDataSource, ColorBar, Span
 import numpy as np
 
 from carfollow import U_I
@@ -71,3 +71,33 @@ def plot_xva(time, x, v, a):
     )
 
     return (pos, spd, acc)
+
+
+def plot_histogram(data_x, var_name=None):
+    """ Plots histogram of data"""
+
+    hist, edges = np.histogram(data_x, density=True)
+    p = figure(title="Histogram", plot_height=500, plot_width=500, background_fill_color="#fafafa")
+    p.quad(
+        top=hist,
+        bottom=0,
+        left=edges[:-1],
+        right=edges[1:],
+        fill_color="navy",
+        line_color="white",
+        alpha=0.5,
+    )
+    mean = Span(location =np.mean(data_x), dimension='height', line_color='red',line_width=1)
+    p.add_layout(mean)
+    p.xaxis.axis_label = var_name
+    p.yaxis.axis_label = "Density"
+    p.grid.grid_line_color="white"
+    return p
+
+def plot_stairs(data_x,data_y, title=None, xlabel=None, ylabel=None):
+    """ Plot stairs plot"""
+    p = figure(title=title, plot_height=500, plot_width=500)
+    p.step(data_x,data_y, line_width=2,mode="before")
+    p.xaxis.axis_label = xlabel
+    p.yaxis.axis_label = ylabel
+    return p   
