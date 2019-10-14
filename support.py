@@ -3,16 +3,48 @@
 """
 
 import numpy as np
-from carfollow import SIGMA_A
+from carfollow import SIGMA_A, U_I
 
 np.random.seed(100)
 
 
 def gaussian(time, s=1):
-    """ creates gaussian curve"""
+    """ Gaussian curve """
     x = (time) / (s / 3)
     # A = 1 / (np.sqrt(2 * np.pi) * s)
     return np.exp(-x ** 2)
+
+
+def sigmoid(x, A: float = 1, a: float = 1, d: int = 5):
+    """Sigmoid function"""
+    return 1 / (1 + np.exp(-(x - d) / a))
+
+
+def deriv_sigmoid(x, A: float = 1, a: float = 1, d: int = 5):
+    """Sigmoid derivative function"""
+    return sigmoid(x, A, a, d) * (1 - sigmoid(x, A, a, d))
+
+
+def pulse_sigmoid(x, A: float = 1, d: int = 0, duration: float = 30):
+    """Sigmoid pulse"""
+    delay = duration - 10
+    return sigmoid(x, A, d=d + 5) - sigmoid(x, A, d=delay + d + 5)
+
+
+def deriv_pulse_sigmoid(x, A: float = 1, d: int = 0, duration: float = 30):
+    """Sigmoid pulse derivative"""
+    delay = duration - 10
+    return deriv_sigmoid(x, A, d=d + 5) - deriv_sigmoid(x, A, d=delay + d)
+
+
+def speed_pulse(x, v0=U_I, drop: float = 1, delay: int = 0, duration: float = 30):
+    """ Create a decreasing speed pulse"""
+    return v0 - pulse_sigmoid(x, drop, delay, duration)
+
+
+def acceleration_pulse(x, v0=U_I, drop: float = 1, delay: int = 0, duration: float = 30):
+    """ Create a decreasing acceleration pulse"""
+    return -deriv_pulse_sigmoid(x, drop, delay, duration)
 
 
 def shifter(signal, shift: int = 0):
