@@ -32,7 +32,7 @@ Tampere.reset()
 # ===============================================================================
 
 # Traffic Network
-trf_net= {"lengths_per_link": (20000, 10000), "lanes_per_link": (1, 2)}
+trf_net = {"lengths_per_link": (20000, 10000), "lanes_per_link": (1, 2)}
 traffic_network = TrafficNetwork(**trf_net)
 
 
@@ -49,7 +49,7 @@ traffic_demand = TrafficDemand(**trf_dmd)
 
 
 class Scenario:
-    def __init__(self, t_network=trf_net, traffic_demand=traffic_demand, mpr=MPR):
+    def __init__(self, t_network=traffic_network, traffic_demand=traffic_demand, mpr=MPR):
         self.network = t_network
         self.demand = traffic_demand
         self.mpr = mpr
@@ -58,46 +58,49 @@ class Scenario:
         """ This will register cars within the traffic network"""
 
         # create vehicles
-        for lk in self.network:
+        for lk in self.network.link_order:
             dmd = self.demand[lk]
             if dmd:
                 N_veh = len(dmd)
-                v_class_lk = self.get_vehicle_class_per_link(N_veh)
-                x_0 = self.demand[lk].full_positions
-                v_0 = np.ones(N_veh) * U_I
-                self.generate_vehicle_list(x_0, v_0,v_class_lk)
+                V_class = self.get_vehicle_class_per_link(N_veh)
+                X_0 = np.flip(self.demand[lk].full_positions)
+                V_0 = np.ones(N_veh) * U_I
+                veh_0 = self.get_ic_vehicles_per_lane(X_0, V_0, V_class, lk)
+                self.generate_vehicle_list(veh_0, lk)
 
     def get_vehicle_class_per_link(self, N):
         """ Generaate vehicles """
-        id_cav = np.random.randint(Tampere.lid, Tampere.lid + N - 1, int(N * self.mpr))  # Id Connected Vehicles
+        id_cav = np.random.randint(
+            Tampere.lid, Tampere.lid + N - 1, int(N * self.mpr)
+        )  # Id Connected Vehicles
         d_class = {k: "CAV" for k in id_cav}
-        v_class = [d_class.get(i, "HDV") for i in range(N)]  # All vehicle types
+        v_class = tuple(d_class.get(i, "HDV") for i in range(N))  # All vehicle types
         return v_class
 
-    def generate_vehicle_list(self, x_0, v_0, v_class):
+    def get_ic_vehicles_per_lane(self, X_0: np.array, V_0: np.array, V_class: tuple, link: int):
+        """ Retrieve intial condition vehicle state per lane"""
+        n_lanes = len(self.network[link])
+        veh_0 = {}
+        for i, ln in enumerate(self.network[link]):
+            veh_0[ln] = (X_0[i::n_lanes], V_0[i::n_lanes], V_class[i::n_lanes])
+        return veh_0
+
+    def generate_vehicle_list(self, veh_0: dict, link: int):
         """
             Generate veh_list 
         """
+        # Iterate over all lanes
+        for ln in self.network[link].lane_order:
 
-        
-        for x0, v0, vtype in zip(x_0, v_0, v_class):
-            self.veh_list.append(Tampere(x0, v0, vtype))
+            # Iterate over all vehicles
+            for x, v, vtype in zip(*veh_0[ln]):
+                self.network[link][ln].veh_list.append(Tampere(x0=x, v0=v, l0=ln, veh_type=vtype))
 
-        # Setting leader for vehicle i
-        for i in range(1, N):
-            veh_list[i].set_leader(veh_list[i - 1])
+            N_veh_lane = len(self.network[link][ln].veh_list)
 
-    # for lk in self.network:
+            # Setting leader for vehicle i
+            for i in range(1, N_veh_lane):
+                self.network[link][ln].veh_list[i].set_leader(
+                    self.network[link][ln].veh_list[i - 1]
+                )
 
-    #     ID_CAV = np.random.randint(1, N - 1, int(N * MPR))  # Id Connected Vehicles
-
-    # # ID_CAV = (2,)
-    # D_CLASS = {k: "CAV" for k in ID_CAV}
-    # V_CLASS = [D_CLASS.get(i, "HDV") for i in range(N)]  # All vehicle types
-    # T_ACCEPT = SHIFT_CONG - np.random.exponential(PERCEP_RADIOUS, N * 1000)
-    # T_ACCEPT = T_ACCEPT[(T_ACCEPT > 0) & (T_ACCEPT < SHIFT_CONG)]
-    # T_ACCEPT = np.random.choice(T_ACCEPT, N)
-
-
-x = Scenario()
-x.link_demand_network()
