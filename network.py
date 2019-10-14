@@ -44,15 +44,16 @@ class TrafficLane:
         self.veh_list.pop()
 
 
-class TrafficLink:
+class TrafficLink(abc.MutableMapping):
 
     __slots__ = ["__lanes", "__lro", "idx"]
     __idx = count(0)  # Link ID
 
     def __init__(self, length: float = L_MAX, n_lanes: int = 1) -> None:
         self.idx = next(self.__class__.__idx)
-        self.__lanes = tuple(TrafficLane(length) for n in range(n_lanes))
-        self.__lro = tuple(ln.idx for ln in self.__lanes)
+        tuple_lanes = tuple(TrafficLane(length) for n in range(n_lanes))
+        self.__lanes = {ln.idx: ln for ln in tuple_lanes}
+        self.__lro = tuple(self.__lanes.keys())
 
     @property
     def lane_order(self):
@@ -72,6 +73,18 @@ class TrafficLink:
         """Iter protocol"""
         yield next(self.lane_order)
 
+    def __getitem__(self, item) -> None:
+        """Mapping protocol"""
+        return self.__lanes.get(item, None)
+
+    def __setitem__(self, key, item: TrafficLane) -> None:
+        """Mapping protocol"""
+        self.__lanes[key] = item
+
+    def __delitem__(self, key) -> None:
+        """Mapping protocol"""
+        del self.__lanes[key]
+
     def __len__(self):
         """ Amount of lanes in link """
         return len(self.__lanes)
@@ -84,10 +97,10 @@ class TrafficNetwork(abc.MutableMapping):
 
     def __init__(self, lengths_per_link: tuple = (L_MAX,), lanes_per_link: tuple = (1,)) -> None:
         self.idx = next(self.__class__.__idx)
-        tuple_link = tuple(
+        tuple_links = tuple(
             TrafficLink(length, lanes) for length, lanes in zip(lengths_per_link, lanes_per_link)
         )
-        self.__links = {x.idx: x for x in tuple_link}
+        self.__links = {lk.idx: lk for lk in tuple_links}
         self.__lro = {lk.idx: lk.lane_order for lk in self.__links.values()}
 
     def set_physical_connection(self, matrix_linkid):
