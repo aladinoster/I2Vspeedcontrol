@@ -7,7 +7,7 @@
 # ===============================================================================
 
 from itertools import count, repeat
-from collections import deque
+from collections import deque, abc
 
 import networkx as nx
 
@@ -46,13 +46,13 @@ class TrafficLane:
 
 class TrafficLink:
 
-    __slots__ = ["_lanes", "__lro", "idx"]
+    __slots__ = ["__lanes", "__lro", "idx"]
     __idx = count(0)  # Link ID
 
     def __init__(self, length: float = L_MAX, n_lanes: int = 1) -> None:
         self.idx = next(self.__class__.__idx)
-        self._lanes = tuple(TrafficLane(length) for n in range(n_lanes))
-        self.__lro = tuple(ln.idx for ln in self._lanes)
+        self.__lanes = tuple(TrafficLane(length) for n in range(n_lanes))
+        self.__lro = tuple(ln.idx for ln in self.__lanes)
 
     @property
     def lane_order(self):
@@ -69,20 +69,26 @@ class TrafficLink:
         return iter(self.lane_order)
 
     def __next__(self):
+        """Iter protocol"""
         yield next(self.lane_order)
 
+    def __len__(self):
+        """ Amount of lanes in link """
+        return len(self.__lanes)
 
-class TrafficNetwork:
 
-    __slots__ = ["_links", "__lro", "idx"]
+class TrafficNetwork(abc.MutableMapping):
+
+    __slots__ = ["__links", "__lro", "idx", "__iter_links"]
     __idx = count(0)  # Network ID
 
-    def __init__(self, lengths_per_link: tuple= (L_MAX,), lanes_per_link: tuple = (1,)) -> None:
+    def __init__(self, lengths_per_link: tuple = (L_MAX,), lanes_per_link: tuple = (1,)) -> None:
         self.idx = next(self.__class__.__idx)
-        self._links = tuple(
+        tuple_link = tuple(
             TrafficLink(length, lanes) for length, lanes in zip(lengths_per_link, lanes_per_link)
         )
-        self.__lro = {lk.idx:lk.lane_order for lk in self._links}
+        self.__links = {x.idx: x for x in tuple_link}
+        self.__lro = {lk.idx: lk.lane_order for lk in self.__links.values()}
 
     def set_physical_connection(self, matrix_linkid):
         pass
@@ -99,14 +105,28 @@ class TrafficNetwork:
 
     def __iter__(self):
         """Iter protocol"""
-        return iter(self.link_order)
+        self.__iter_links = iter(self.__links)
+        return self.__iter_links
 
     def __next__(self):
-        yield next(self.link_order)
+        """Iter protocol"""
+        return next(self.__iter_links)
 
+    def __getitem__(self, item) -> None:
+        """Mapping protocol"""
+        return self.__links.get(item, None)
 
-class ScenarioCase(TrafficNetwork):
-    """ Fills specific for a particular traffic network"""
+    def __setitem__(self, key, item: TrafficLink) -> None:
+        """Mapping protocol"""
+        self.__links[key] = item
 
-    def __init__(self):
-        pass
+    def __delitem__(self, key) -> None:
+        """Mapping protocol"""
+        del self.__links[key]
+
+    def __len__(self):
+        """ Amount of links in network"""
+        return len(self.__links)
+
+    def __str__(self):
+        return str(self.__lro)

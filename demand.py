@@ -75,7 +75,14 @@ class Demand:
         return row(space_hwy, time_hwy, step_flow)
 
     def __len__(self) -> int:
+        """ Number of cars"""
         return len(self.full_positions)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({tuple(self.value_duration.keys())},{tuple(self.value_duration.values())})"
+
+    def __str__(self):
+        return str(self.value_duration)
 
 
 class TrafficDemand(collections.abc.MutableMapping):
@@ -102,3 +109,9 @@ class TrafficDemand(collections.abc.MutableMapping):
 
     def __len__(self):
         return len(self.__dct)
+
+    def __str__(self):
+        return str(self.__dct)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({tuple(self.__dct.keys())},{tuple(self.__dct.values())})"
