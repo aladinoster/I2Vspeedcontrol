@@ -24,7 +24,7 @@ L_MAX = 20000
 
 class TrafficLane:
 
-    __idx = count(0)  # Vehicle ID
+    __idx = count(0)  # Lane ID
 
     __slots__ = ["length", "veh_list", "idx"]
 
@@ -47,12 +47,12 @@ class TrafficLane:
 class TrafficLink:
 
     __slots__ = ["_lanes", "__lro", "idx"]
-    __idx = count(0)  # Vehicle ID
+    __idx = count(0)  # Link ID
 
     def __init__(self, length: float = L_MAX, n_lanes: int = 1) -> None:
         self.idx = next(self.__class__.__idx)
         self._lanes = tuple(TrafficLane(length) for n in range(n_lanes))
-        self.__lro = set(lk.idx for lk in self._lanes)
+        self.__lro = tuple(ln.idx for ln in self._lanes)
 
     @property
     def lane_order(self):
@@ -75,14 +75,14 @@ class TrafficLink:
 class TrafficNetwork:
 
     __slots__ = ["_links", "__lro", "idx"]
-    __idx = count(0)  # Vehicle ID
+    __idx = count(0)  # Network ID
 
-    def __init__(self, lengthslinks: list = [L_MAX], laneslinks: list = [1]) -> None:
+    def __init__(self, lengths_per_link: tuple= (L_MAX,), lanes_per_link: tuple = (1,)) -> None:
         self.idx = next(self.__class__.__idx)
         self._links = tuple(
-            TrafficLink(length, lanes) for length, lanes in zip(lengthslinks, laneslinks)
+            TrafficLink(length, lanes) for length, lanes in zip(lengths_per_link, lanes_per_link)
         )
-        self.__lro = (lk.idx for lk in self._links)
+        self.__lro = {lk.idx:lk.lane_order for lk in self._links}
 
     def set_physical_connection(self, matrix_linkid):
         pass
@@ -99,7 +99,7 @@ class TrafficNetwork:
 
     def __iter__(self):
         """Iter protocol"""
-        return self.link_order
+        return iter(self.link_order)
 
     def __next__(self):
         yield next(self.link_order)
