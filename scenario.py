@@ -31,7 +31,12 @@ Tampere.reset()
 # Defaults
 # ===============================================================================
 
-test_case = TrafficNetwork((20000, 10000), (1, 2))
+# Traffic Network
+trf_net= {"lengths_per_link": (20000, 10000), "lanes_per_link": (1, 2)}
+traffic_network = TrafficNetwork(**trf_net)
+
+
+# Demand
 demands = Demand((C / 2,), (12,))
 trf_dmd = {"lks": (1,), "demands": (demands, demands)}
 
@@ -44,7 +49,7 @@ traffic_demand = TrafficDemand(**trf_dmd)
 
 
 class Scenario:
-    def __init__(self, t_network=test_case, traffic_demand=traffic_demand, mpr=MPR):
+    def __init__(self, t_network=trf_net, traffic_demand=traffic_demand, mpr=MPR):
         self.network = t_network
         self.demand = traffic_demand
         self.mpr = mpr
