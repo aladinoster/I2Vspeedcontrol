@@ -49,10 +49,11 @@ traffic_demand = TrafficDemand(**trf_dmd)
 
 
 class Scenario:
-    def __init__(self, t_network=traffic_network, traffic_demand=traffic_demand, mpr=MPR):
-        self.network = t_network
+    def __init__(self, traffic_network=traffic_network, traffic_demand=traffic_demand, mpr=MPR):
+        self.network = traffic_network
         self.demand = traffic_demand
         self.mpr = mpr
+        self.link_demand_network()
 
     def link_demand_network(self):
         """ This will register cars within the traffic network"""
@@ -103,4 +104,3 @@ class Scenario:
                 self.network[link][ln].veh_list[i].set_leader(
                     self.network[link][ln].veh_list[i - 1]
                 )
-
