@@ -65,3 +65,14 @@ class SimulationControl:
         #                 acc = U_I + speed_change(time, SPEED_REDUCTION, SHIFT_CONG - t)
         #                 veh.register_control_speed(acc)
         #         veh.step_evolution(control=u)
+
+    # for lk in self.network:
+
+    #     ID_CAV = np.random.randint(1, N - 1, int(N * MPR))  # Id Connected Vehicles
+
+    # # ID_CAV = (2,)
+    # D_CLASS = {k: "CAV" for k in ID_CAV}
+    # V_CLASS = [D_CLASS.get(i, "HDV") for i in range(N)]  # All vehicle types
+    # T_ACCEPT = SHIFT_CONG - np.random.exponential(PERCEP_RADIOUS, N * 1000)
+    # T_ACCEPT = T_ACCEPT[(T_ACCEPT > 0) & (T_ACCEPT < SHIFT_CONG)]
+    # T_ACCEPT = np.random.choice(T_ACCEPT, N)
