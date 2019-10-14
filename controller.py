@@ -27,7 +27,7 @@ class SimulationControl:
 
     def __init__(self, traffic_network, time_total):
         self.tfnet = traffic_network
-        self.time_iterator = T_TOTAL
+        self.time_iterator = time_total
 
     def set_demand(self, demand):
         self._dmd = demand
@@ -44,12 +44,15 @@ class SimulationControl:
 
     @time_iterator.setter
     def time_iterator(self, value=T_TOTAL) -> None:
-        self._tsim = iter(range(T_TOTAL))
+        self._tsim = range(T_TOTAL)
 
-    def run_simulation(self):
+    def solve_merges(self) -> None:
+        """ Solve potential merges for a network """
+
+    def run_simulation(self) -> None:
         """ Execute a traffic simulator"""
-        for i in self.time_iterator:
-            self.solve_merges()
+        for t in self.time_iterator:
+            # self.solve_merges() # 1 link at a time
             for link in self.tfnet:
                 link.evolve_step()
 
