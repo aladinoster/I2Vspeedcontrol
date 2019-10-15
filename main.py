@@ -1,6 +1,6 @@
 #%%
 from carfollow import Tampere, W_I, U_I, K_X
-from support import leader_congestion_pattern, speed_change
+from support import leader_congestion_pattern, speed_change, acceleration_pulse
 import numpy as np
 
 from plottools import plot_single_trace, plot_xva
@@ -12,7 +12,7 @@ from bokeh.layouts import row, column
 
 #%%
 # Constants
-N = 200  # 50
+N = 10  # 50
 T_TOTAL = 720  # Simulation time
 time = np.arange(T_TOTAL)  # Time vector
 
@@ -55,6 +55,17 @@ lead_acc = leader_congestion_pattern(time, shift=SHIFT_CONG)
 leader = plot_single_trace(
     time, lead_acc, "Leaders' acceleration", "Time [secs]", "Acceleration [m/s²]"
 )
+show(leader)
+
+
+def lead_acc2(x):
+    return acceleration_pulse(x, U_I, drop=7, delay=15000, duration=100)
+
+
+x = np.linspace(0, 20000, 20000)
+y = lead_acc2(x)
+leader2 = plot_single_trace(x, y, "leader acc", "time", "acc")
+show(leader2)
 
 #%%
 # Speed Selection
@@ -69,15 +80,15 @@ V = V0
 A = A0
 
 
-for t, u in zip(time, lead_acc):
+for t in time:
     for veh in veh_list:
-        if veh.type == "CAV" and not veh.acc:
-            t_accept = T_ACCEPT[veh.idx]
-            # t_accept = 100
-            if t >= t_accept:
-                acc = U_I + speed_change(time, SPEED_REDUCTION, SHIFT_CONG - t)
-                veh.register_control_speed(acc)
-        veh.step_evolution(control=u)
+        # if veh.type == "CAV" and not veh.acc:
+        #     t_accept = T_ACCEPT[veh.idx]
+        #     # t_accept = 100
+        #     if t >= t_accept:
+        #         acc = U_I + speed_change(time, SPEED_REDUCTION, SHIFT_CONG - t)
+        #         veh.register_control_speed(acc)
+        veh.step_evolution(control=lead_acc2)
 
     V = np.vstack((V, np.array([veh.v for veh in veh_list])))
     X = np.vstack((X, np.array([veh.x for veh in veh_list])))

@@ -261,7 +261,7 @@ class Tampere(CarFollowLaw):
         if self.veh_lead:
             self.a = self.acel() + np.random.normal(0, SIGMA_A)  # Car following
         else:
-            self.a = self.control  # Leader vehicle 2nd order
+            self.a = self.control(self.x_t) + np.random.normal(0, 0.05)  # Leader vehicle 2nd order
 
 
 # ===============================================================================
