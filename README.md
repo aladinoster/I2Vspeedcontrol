@@ -2,7 +2,7 @@
 
 ## <span style="color:red"> New information </span>
 
-* Launch new simulations[here](https://mybinder.org/v2/gh/aladinoster/v2v-test.git/test?filepath=General.ipynb)
+* <span style="color:red"> Launch new simulations </span>  [here](https://mybinder.org/v2/gh/aladinoster/v2v-test.git/test?filepath=General.ipynb)
 
 # Scoop Demo 
 
