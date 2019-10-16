@@ -15,36 +15,47 @@ def gaussian(time, s=1):
     return np.exp(-x ** 2)
 
 
-def sigmoid(x, A: float = 1, a: float = 1, d: int = 5):
+def sigmoid(x, A: float = 1, a: float = 50, d: int = 250):
     """Sigmoid function"""
     return A * 1 / (1 + np.exp(-(x - d) / a))
 
 
-def deriv_sigmoid(x, A: float = 1, a: float = 1, d: int = 5):
+def deriv_sigmoid(x, A: float = 1, a: float = 50, d: int = 250):
     """Sigmoid derivative function"""
-    return A * sigmoid(x, 1, a, d) * (1 - sigmoid(x, 1, a, d))
+    return (A / a) * sigmoid(x, 1, a, d) * (1 - sigmoid(x, 1, a, d))
 
 
-def pulse_sigmoid(x, A: float = 1, d: int = 0, duration: float = 30):
-    """Sigmoid pulse"""
-    delay = duration - 10
-    return sigmoid(x, A, d=d + 5) - sigmoid(x, A, d=delay + d + 5)
+def pulse_sigmoid(x, A: float = 1, d: int = 250, duration: float = 1000):
+    """Sigmoid pulse minimum duration 1000 meters"""
+    d = max(d, 250)  # Minimum effective delay
+    duration = max(duration, 1000)  # Minimum effective duration
+    effective_duration = 500 + duration - 1000  # Transforming total duration into effective
+    return sigmoid(x, A, d=d) - sigmoid(x, A, d=d + effective_duration)
 
 
-def deriv_pulse_sigmoid(x, A: float = 1, d: int = 0, duration: float = 30):
+def deriv_pulse_sigmoid(x, A: float = 1, a: float = 50, d: int = 250, duration: float = 1000):
     """Sigmoid pulse derivative"""
-    delay = duration - 10
-    return deriv_sigmoid(x=x, A=A, d=d + 5) - deriv_sigmoid(x=x, A=A, d=delay + d)
+    d = max(d, 250)  # Minimum effective delay
+    duration = max(duration, 1000)  # Minimum effective duration
+    effective_duration = 500 + duration - 1000  # Transforming total duration into effective
+    return 20 * deriv_sigmoid(x=x, A=A, a=a, d=d) - 20 * deriv_sigmoid(
+        x=x, A=A, a=a, d=d + effective_duration
+    )
 
 
-def speed_pulse(x, v0=U_I, drop: float = 1, delay: int = 0, duration: float = 30):
+def speed_pulse(x, v0=U_I, drop: float = 1, delay: int = 250, duration: float = 1000):
     """ Create a decreasing speed pulse"""
     return v0 - pulse_sigmoid(x=x, A=drop, d=delay, duration=duration)
 
 
-def acceleration_pulse(x, v0=U_I, drop: float = 1, delay: int = 0, duration: float = 30):
+def acceleration_pulse(x, v0=U_I, drop: float = 1, delay: int = 250, duration: float = 1000):
     """ Create a decreasing acceleration pulse"""
     return -deriv_pulse_sigmoid(x=x, A=drop, d=delay, duration=duration)
+
+
+def speed_drop(x,v0=U_I,drop:float=1,delay:int=250):
+    """ Create a decreasing jump on speed"""
+    return v0-sigmoid(x,A=drop,d=delay)
 
 
 def shifter(signal, shift: int = 0):
@@ -67,18 +78,3 @@ def speed_change(time, change: float = 1, expander: float = 10, shift: int = 0):
     vit_control = change * (-1 + gaussian(time, s=expander))
     return shifter(vit_control, shift)
 
-
-#%%
-import numpy as np
-from bokeh.plotting import figure, show
-from bokeh.io import output_notebook
-
-output_notebook()
-
-x = np.linspace(0, 1000, 5000)
-y = speed_pulse(x,25,7,800,50)
-p = figure()
-p.line(x, y)
-show(p)
-
-#%%

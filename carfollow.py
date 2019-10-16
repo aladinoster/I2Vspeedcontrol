@@ -24,7 +24,9 @@ C_2 = 0.5  # Spacing coefficient
 C_3 = 0.5  # Tampere coefficient
 
 # IDM MODEL
-A_MAX = 1  # Max accel
+A_MAX = 3 # Max accel
+A_MIN = -3  # Min accel
+
 B = 1.67  # Max decel
 DELTA = 4  # Exponent
 V_0 = 25  # 90 / 3.6
@@ -132,8 +134,8 @@ class CarFollowLaw(Vehicle):
             Vehicle desired speed
         """
         try:
-            return next(self._vd)
-        except (StopIteration, AttributeError):
+            return self._vd(self.x_t)
+        except (TypeError,AttributeError):
             return U_I
 
     @vd.setter
@@ -144,7 +146,7 @@ class CarFollowLaw(Vehicle):
         """
             This registers an external control signal into the vehicle behavior
         """
-        self.vd = iter(control)
+        self.vd = control
         self.acc = True
 
     def step_evolution(self, control: float = 0) -> None:
@@ -259,10 +261,11 @@ class Tampere(CarFollowLaw):
                     manual acceleration
         """
         if self.veh_lead:
-            self.a = self.acel() + np.random.normal(0, SIGMA_A)  # Car following
+            self.a = max(A_MIN,min(self.acel() + np.random.normal(0, SIGMA_A),A_MAX))  # Car following
         else:
-            self.a = self.control(self.x_t) + np.random.normal(0, 0.05)  # Leader vehicle 2nd order
-
+            self.vd = self.control
+            self.a = max(A_MIN,min(self.free_acc()/4,A_MAX))
+ 
 
 # ===============================================================================
 # IDM Car Following Model
