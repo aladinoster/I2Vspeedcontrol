@@ -171,7 +171,12 @@ x_t = time
 a_t = A[:, 0]
 leader_at = plot_single_trace(x_t, a_t, "Leaders' acceleration", "Time [m]", "Acceleration [m/s²]")
 zooms = ((MIN_DIST, X_CONGESTION + L_CONGESTION), (-1, U_I + 1), (A_MIN - 0.5, A_MAX + 0.5))
-pos, spd, acc = plot_xva(time, X, V, A, y_range=zooms)
+titles = (
+    f"X-t MPR={MPR*100}% F={TF}[veh/h] D = {MIN_DIST}[m] ",
+    f"V-t MPR={MPR*100}% F={TF}[veh/h] D = {MIN_DIST}[m]",
+    f"A-t MPR={MPR*100}% F={TF}[veh/h] D = {MIN_DIST}[m]",
+)
+pos, spd, acc = plot_xva(time, X, V, A, y_range=zooms, titles=titles)
 poswoz = plot_multiple_trajectories(time, X, V, "Position", "Time [secs]", "Position [m]")
 #%%
 # Writting leader's file
@@ -195,11 +200,7 @@ export_png(acc, filename=data + filename)
 print(f"File: {filename} has been saved")
 # show(row(pos, spd, acc))
 
-# line_1 =  Span(location=5000, dimension='width', line_color='orangered',line_dash='dashed', line_width=3)
-# line_2 =  Span(location=15000, dimension='width', line_color='orangered',line_dash='dashed', line_width=3)
-# line_3 =  Span(location=17900, dimension='width', line_color='orangered',line_dash='dashed', line_width=3)pos.add_layout(line_1)
-# pos.add_layout(line_2)
-# pos.add_layout(line_3)show(column(row(leader, pos), row(spd, acc)))#%% [markdown]
+#%% [markdown]
 # # A. Ladino
 
 

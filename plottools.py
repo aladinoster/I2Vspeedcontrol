@@ -75,17 +75,18 @@ def plot_single_trace(data_x, data_y, title=None, xlabel=None, ylabel=None):
     return p
 
 
-def plot_xva(time, x, v, a, y_range):
+def plot_xva(time, x, v, a, y_range, titles):
     """ Plots all trajectories pos, speed acceleration"""
     pos_zoom, spd_zoom, acc_zoom = y_range
+    pos_tit, spd_tit, acc_tit = titles
     pos = plot_multiple_trajectories(
-        time, x, v, "Position", "Time [secs]", "Position [m]", y_range=pos_zoom
+        time, x, v, pos_tit, "Time [secs]", "Position [m]", y_range=pos_zoom
     )
     spd = plot_multiple_trajectories(
-        time, v, v, "Speed", "Time [secs]", "Speed [m/s]", y_range=spd_zoom
+        time, v, v, spd_tit, "Time [secs]", "Speed [m/s]", y_range=spd_zoom
     )
     acc = plot_multiple_trajectories(
-        time, a, a, "Acceleration", "Time [secs]", "Acceleration [m/s²]", y_range=acc_zoom
+        time, a, a, acc_tit, "Time [secs]", "Acceleration [m/s²]", y_range=acc_zoom
     )
 
     return (pos, spd, acc)
