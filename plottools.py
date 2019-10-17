@@ -35,15 +35,28 @@ def post_decoration(p, mapper, xlabel, ylabel):
     return p
 
 
-def plot_multiple_trajectories(data_x, data_y, data_color, title=None, xlabel=None, ylabel=None):
+def plot_multiple_trajectories(
+    data_x,
+    data_y,
+    data_color,
+    title=None,
+    xlabel=None,
+    ylabel=None,
+    x_range=(0, 800),
+    y_range=(0, 20000),
+):
     """ Draw multiple trajectories"""
-    p = figure(title=title, plot_height=500, plot_width=500)
+    p = figure(
+        title=title, tools=[], plot_height=500, plot_width=500, x_range=x_range, y_range=y_range
+    )
 
     mapper = get_mapper(data_color)
+    p.toolbar.logo = None
+    p.toolbar_location = None
 
     for i, data in enumerate(zip(data_y.T, data_color.T)):
         y, c = data
-        p = plot_single_trajectory(p, data_x, y[:-1], c[:-1], mapper)
+        p = plot_single_trajectory(p, data_x, y, c, mapper)
 
     p = post_decoration(p, mapper, xlabel, ylabel)
     return p
@@ -62,12 +75,17 @@ def plot_single_trace(data_x, data_y, title=None, xlabel=None, ylabel=None):
     return p
 
 
-def plot_xva(time, x, v, a):
+def plot_xva(time, x, v, a, y_range):
     """ Plots all trajectories pos, speed acceleration"""
-    pos = plot_multiple_trajectories(time, x, v, "Position", "Time [secs]", "Position [m]")
-    spd = plot_multiple_trajectories(time, v, v, "Speed", "Time [secs]", "Speed [m/s]")
+    pos_zoom, spd_zoom, acc_zoom = y_range
+    pos = plot_multiple_trajectories(
+        time, x, v, "Position", "Time [secs]", "Position [m]", y_range=pos_zoom
+    )
+    spd = plot_multiple_trajectories(
+        time, v, v, "Speed", "Time [secs]", "Speed [m/s]", y_range=spd_zoom
+    )
     acc = plot_multiple_trajectories(
-        time, a, a, "Acceleration", "Time [secs]", "Acceleration [m/s²]"
+        time, a, a, "Acceleration", "Time [secs]", "Acceleration [m/s²]", y_range=acc_zoom
     )
 
     return (pos, spd, acc)
@@ -87,17 +105,18 @@ def plot_histogram(data_x, var_name=None):
         line_color="white",
         alpha=0.5,
     )
-    mean = Span(location =np.mean(data_x), dimension='height', line_color='red',line_width=1)
+    mean = Span(location=np.mean(data_x), dimension="height", line_color="red", line_width=1)
     p.add_layout(mean)
     p.xaxis.axis_label = var_name
     p.yaxis.axis_label = "Density"
-    p.grid.grid_line_color="white"
+    p.grid.grid_line_color = "white"
     return p
 
-def plot_stairs(data_x,data_y, title=None, xlabel=None, ylabel=None):
+
+def plot_stairs(data_x, data_y, title=None, xlabel=None, ylabel=None):
     """ Plot stairs plot"""
     p = figure(title=title, plot_height=500, plot_width=500)
-    p.step(data_x,data_y, line_width=2,mode="before")
+    p.step(data_x, data_y, line_width=2, mode="before")
     p.xaxis.axis_label = xlabel
     p.yaxis.axis_label = ylabel
-    return p   
+    return p
