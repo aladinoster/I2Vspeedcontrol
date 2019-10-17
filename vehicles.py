@@ -105,7 +105,7 @@ class Vehicle(object):
         """
             Dynamic equation speed
         """
-        return self.v_t + self.a * DT
+        return max(self.v_t + self.a * DT, 0)
 
     @property
     def x(self) -> float:
