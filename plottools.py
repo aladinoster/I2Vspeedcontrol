@@ -9,10 +9,10 @@ import numpy as np
 from carfollow import U_I
 
 
-def plot_single_trajectory(p, x, y, c, mapper):
+def plot_single_trajectory(p, x, y, c, mapper,size=2):
     """ Daraws a single trajectory"""
     source = ColumnDataSource(dict(x=x, y=y, color=c))
-    p.circle(x="x", y="y", line_color=mapper, color=mapper, fill_alpha=1, size=2, source=source)
+    p.circle(x="x", y="y", line_color=mapper, color=mapper, fill_alpha=1, size=size, source=source)
     p.line(x, y, color="gainsboro")
     return p
 
@@ -35,39 +35,62 @@ def post_decoration(p, mapper, xlabel, ylabel):
     return p
 
 
-def plot_multiple_trajectories(data_x, data_y, data_color, title=None, xlabel=None, ylabel=None):
+def plot_multiple_trajectories(
+    data_x,
+    data_y,
+    data_color,
+    title=None,
+    xlabel=None,
+    ylabel=None,
+    x_range=(0, 800),
+    y_range=(0, 20000),
+):
     """ Draw multiple trajectories"""
-    p = figure(title=title, plot_height=500, plot_width=500)
+    p = figure(
+        title=title, tools=[], plot_height=500, plot_width=500, x_range=x_range, y_range=y_range
+    )
 
     mapper = get_mapper(data_color)
+    p.toolbar.logo = None
+    p.toolbar_location = None
 
     for i, data in enumerate(zip(data_y.T, data_color.T)):
         y, c = data
-        p = plot_single_trajectory(p, data_x, y[:-1], c[:-1], mapper)
+        p = plot_single_trajectory(p, data_x, y, c, mapper)
 
     p = post_decoration(p, mapper, xlabel, ylabel)
     return p
 
 
-def plot_single_trace(data_x, data_y, title=None, xlabel=None, ylabel=None):
+def plot_single_trace(data_x, data_y, title=None, xlabel=None, ylabel=None, p_height=500, p_width=500):
     """ Plots a single trace """
 
-    p = figure(title=title, plot_height=500, plot_width=500)
-
+    p = figure(title=title, plot_height=p_height, plot_width=p_width)
+    p.yaxis.axis_label_text_font_size='14pt'
+    p.yaxis.major_label_text_font_size='14pt'
+    p.xaxis.axis_label_text_font_size='14pt'
+    p.xaxis.major_label_text_font_size='14pt'    
+    
     mapper = get_mapper(data_y)
 
-    p = plot_single_trajectory(p, data_x, data_y, data_y, mapper)
+    p = plot_single_trajectory(p, data_x, data_y, data_y, mapper, 4)
 
     p = post_decoration(p, mapper, xlabel, ylabel)
     return p
 
 
-def plot_xva(time, x, v, a):
+def plot_xva(time, x, v, a, y_range, titles):
     """ Plots all trajectories pos, speed acceleration"""
-    pos = plot_multiple_trajectories(time, x, v, "Position", "Time [secs]", "Position [m]")
-    spd = plot_multiple_trajectories(time, v, v, "Speed", "Time [secs]", "Speed [m/s]")
+    pos_zoom, spd_zoom, acc_zoom = y_range
+    pos_tit, spd_tit, acc_tit = titles
+    pos = plot_multiple_trajectories(
+        time, x, v, pos_tit, "Time [secs]", "Position [m]", y_range=pos_zoom
+    )
+    spd = plot_multiple_trajectories(
+        time, v, v, spd_tit, "Time [secs]", "Speed [m/s]", y_range=spd_zoom
+    )
     acc = plot_multiple_trajectories(
-        time, a, a, "Acceleration", "Time [secs]", "Acceleration [m/s²]"
+        time, a, a, acc_tit, "Time [secs]", "Acceleration [m/s²]", y_range=acc_zoom
     )
 
     return (pos, spd, acc)
@@ -87,17 +110,22 @@ def plot_histogram(data_x, var_name=None):
         line_color="white",
         alpha=0.5,
     )
-    mean = Span(location =np.mean(data_x), dimension='height', line_color='red',line_width=1)
+    p.yaxis.axis_label_text_font_size='13pt'
+    p.yaxis.major_label_text_font_size='13pt'
+    p.xaxis.axis_label_text_font_size='13pt'
+    p.xaxis.major_label_text_font_size='13pt'        
+    mean = Span(location=np.mean(data_x), dimension="height", line_color="red", line_width=1)
     p.add_layout(mean)
     p.xaxis.axis_label = var_name
     p.yaxis.axis_label = "Density"
-    p.grid.grid_line_color="white"
+    p.grid.grid_line_color = "white"
     return p
 
-def plot_stairs(data_x,data_y, title=None, xlabel=None, ylabel=None):
+
+def plot_stairs(data_x, data_y, title=None, xlabel=None, ylabel=None):
     """ Plot stairs plot"""
     p = figure(title=title, plot_height=500, plot_width=500)
-    p.step(data_x,data_y, line_width=2,mode="before")
+    p.step(data_x, data_y, line_width=2, mode="before")
     p.xaxis.axis_label = xlabel
     p.yaxis.axis_label = ylabel
-    return p   
+    return p
