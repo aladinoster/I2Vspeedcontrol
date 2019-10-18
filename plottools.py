@@ -9,10 +9,10 @@ import numpy as np
 from carfollow import U_I
 
 
-def plot_single_trajectory(p, x, y, c, mapper):
+def plot_single_trajectory(p, x, y, c, mapper,size=2):
     """ Daraws a single trajectory"""
     source = ColumnDataSource(dict(x=x, y=y, color=c))
-    p.circle(x="x", y="y", line_color=mapper, color=mapper, fill_alpha=1, size=2, source=source)
+    p.circle(x="x", y="y", line_color=mapper, color=mapper, fill_alpha=1, size=size, source=source)
     p.line(x, y, color="gainsboro")
     return p
 
@@ -62,14 +62,18 @@ def plot_multiple_trajectories(
     return p
 
 
-def plot_single_trace(data_x, data_y, title=None, xlabel=None, ylabel=None):
+def plot_single_trace(data_x, data_y, title=None, xlabel=None, ylabel=None, p_height=500, p_width=500):
     """ Plots a single trace """
 
-    p = figure(title=title, plot_height=500, plot_width=500)
-
+    p = figure(title=title, plot_height=p_height, plot_width=p_width)
+    p.yaxis.axis_label_text_font_size='14pt'
+    p.yaxis.major_label_text_font_size='14pt'
+    p.xaxis.axis_label_text_font_size='14pt'
+    p.xaxis.major_label_text_font_size='14pt'    
+    
     mapper = get_mapper(data_y)
 
-    p = plot_single_trajectory(p, data_x, data_y, data_y, mapper)
+    p = plot_single_trajectory(p, data_x, data_y, data_y, mapper, 4)
 
     p = post_decoration(p, mapper, xlabel, ylabel)
     return p
@@ -106,6 +110,10 @@ def plot_histogram(data_x, var_name=None):
         line_color="white",
         alpha=0.5,
     )
+    p.yaxis.axis_label_text_font_size='13pt'
+    p.yaxis.major_label_text_font_size='13pt'
+    p.xaxis.axis_label_text_font_size='13pt'
+    p.xaxis.major_label_text_font_size='13pt'        
     mean = Span(location=np.mean(data_x), dimension="height", line_color="red", line_width=1)
     p.add_layout(mean)
     p.xaxis.axis_label = var_name

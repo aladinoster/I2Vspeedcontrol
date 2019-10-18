@@ -49,9 +49,3 @@ def acceleration_pulse(x, v0=U_I, drop: float = 1, delay: int = 250, duration: f
 def speed_drop(x, v0=U_I, drop: float = 1, delay: int = 250):
     """ Create a decreasing jump on speed"""
     return v0 - sigmoid(x, A=drop, d=delay)
-
-
-def shifter(signal, shift: int = 0):
-    """ Circular shift of a signal """
-    shift = np.clip(shift, 0, 480)  # Safe shift
-    return np.roll(signal, shift)
