@@ -16,3 +16,4 @@ dependencies:
   - ipympl
   - networkx
   - selenium
+  - phantomjs
