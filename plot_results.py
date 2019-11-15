@@ -1,4 +1,3 @@
-
 from itertools import product
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,6 +9,7 @@ MPR = (0, 0.1, 0.2, 0.3, 0.4)
 
 cases = product(MPR, MIN_DIST, Q)
 list_cases = list(product(MPR, MIN_DIST, Q))
+
 
 def df_standard(df):
     """ Standardize cases """
@@ -44,6 +44,7 @@ def refer_to_mpr(df):
     df = df.round(3)
     return df
 
+
 df = refer_to_mpr(df)
 
 # Study cases
@@ -72,7 +73,7 @@ ax[1].set_ylabel("Change Avg Travel Time [%]", fontdict={"fontsize": 20})
 ax[1].set_title(f"Distance {d2} [m]", fontdict={"fontsize": 20})
 ax[1].grid(True)
 
-plt.savefig("data/percTTvsFlow.png")
+plt.savefig("data/img/summary/percTTvsFlow.png")
 
 fig, ax = plt.subplots(1, 2, figsize=(15, 7.5), sharey=False)
 
@@ -98,12 +99,13 @@ ax[1].set_ylabel("Change Avg Travel Time [%]", fontdict={"fontsize": 20})
 ax[1].set_title(f"Flow {f2} [veh/h]", fontdict={"fontsize": 20})
 ax[1].grid(True)
 
-plt.savefig("data/percTTvsDistance.png")
+plt.savefig("data/img/summary/percTTvsDistance.png")
 
 
 #%%
 
-dpol = pd.read_csv("data/data_comb.csv")
+dpol = pd.read_csv("data/eu4dpfmix.csv")
+
 
 def generate_cols(df):
     data = df["Cycle"].split("-")
@@ -119,22 +121,23 @@ def refer_to_mpr_pol(df):
     reference = df[df["mpr"].eq(0)]
     reference = pd.concat([reference] * 5).reset_index()
     reference = reference.drop("index", axis=1)
-    dif1 = df["CO2_TP"]- reference["CO2_TP"] 
+    dif1 = df["CO2_TP"] - reference["CO2_TP"]
     df["CO2_TPperc"] = (dif1.divide(reference["CO2_TP"])) * 100
     df = df.round(3)
     return df
 
-fields =['vid','mpr','flow','dist']
-dpol[fields] = dpol.apply(generate_cols,axis=1)
 
-dpolf=dpol[['CO2_TP','mpr','flow','dist']]
-dpolf = dpolf.groupby(['mpr','flow','dist']).sum()
+fields = ["vid", "mpr", "flow", "dist"]
+dpol[fields] = dpol.apply(generate_cols, axis=1)
+
+dpolf = dpol[["CO2_TP", "mpr", "flow", "dist"]]
+dpolf = dpolf.groupby(["mpr", "flow", "dist"]).sum()
 dpolf = dpolf.reset_index()
 
-dpolf['mpr'] = dpolf['mpr'].replace(0.1,0)
+dpolf["mpr"] = dpolf["mpr"].replace(0.1, 0)
 dpolf = refer_to_mpr_pol(dpolf)
 
-dpolf['flow'] = dpolf['flow']*2880
+dpolf["flow"] = dpolf["flow"] * 2880
 
 fig, ax = plt.subplots(1, 2, figsize=(15, 7.5), sharey=True)
 
@@ -158,4 +161,4 @@ ax[1].set_ylabel("Change in CO$_2$ [%]", fontdict={"fontsize": 20})
 ax[1].set_title(f"Distance {d2} [m]", fontdict={"fontsize": 20})
 ax[1].grid(True)
 
-plt.savefig("data/CO2vsFlow.png")
+plt.savefig("data/img/summary/CO2vsFlow.png")
