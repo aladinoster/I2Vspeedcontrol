@@ -50,7 +50,7 @@ def create_columns(data_frame):
     return data_frame
 
 
-def refer_to_mpr(data_frame):
+def refer_to_mpr(data_frame, field):
     """
         Refer to MPR 0 %
     """
@@ -61,9 +61,9 @@ def refer_to_mpr(data_frame):
     reference = reference.drop("index", axis=1)
 
     # Compute difference
-    diff_df = data_frame["CO2_TP"] - reference["CO2_TP"]
+    diff_df = data_frame[field] - reference[field]
     # diff_df = diff_df.reset_index()
-    data_frame["CO2 %"] = (diff_df.divide(reference["CO2_TP"])) * 100
+    data_frame["CO2 %"] = (diff_df.divide(reference[field])) * 100
 
     # Round for results
     data_frame = data_frame.round(3)
@@ -121,6 +121,9 @@ def plot_co2(data_frame):
 # Processing
 # ==============================================================================
 
+# CO2
+# ==============================================================================
+
 # Import csv files
 dflst = [pd.read_csv(file) for file in ddir_lst]
 fltstr = "PC_EU4_D_DPFMix_HBEFA41.gen"
@@ -140,7 +143,7 @@ co2_df["mpr"] = co2_df["mpr"] * 100  # Flow
 co2_df["flow"] = co2_df["flow"] * 2880
 
 # Refer data to MPR 0%
-co2prc_df = refer_to_mpr(co2_df)
+co2prc_df = refer_to_mpr(co2_df, "CO2_TP")
 
 # Plot CO 2 % vs Flow
 figco2, axco2 = plot_co2(co2prc_df)
@@ -148,5 +151,17 @@ plt.savefig("data/img/summary/CO2vsFlow.png")
 
 figco2, axco2 = plot_co2perc(co2prc_df)
 plt.savefig("data/img/summary/CO2%vsFlow.png")
-
 # plt.show()
+
+# Travel Time
+# ==============================================================================
+
+# Import csv files
+tt_df = pd.read_csv(
+    "data/Indicators.csv",
+    names=["mpr", "flow", "distance", "meanTT", "stdTT", "totalTT"],
+)
+
+# Replace values
+tt_df = tt_df.drop_duplicates()
+tt_df["flow"] = tt_df["flow"] * 3.6
