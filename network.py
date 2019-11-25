@@ -2,9 +2,9 @@
     Network Traffic + V2V 
 """
 
-# ===============================================================================
+# ==============================================================================
 # Imports
-# ===============================================================================
+# ==============================================================================
 
 from itertools import count, repeat
 from collections import deque, abc
@@ -12,14 +12,14 @@ from collections import deque, abc
 import networkx as nx
 
 
-# ===============================================================================
+# ==============================================================================
 # Constants
-# ===============================================================================
+# ==============================================================================
 L_MAX = 20000
 
-# ===============================================================================
+# ==============================================================================
 # Classes
-# ===============================================================================
+# ==============================================================================
 
 
 class TrafficLane:
@@ -95,10 +95,13 @@ class TrafficNetwork(abc.MutableMapping):
     __slots__ = ["__links", "__lro", "idx", "__iter_links"]
     __idx = count(0)  # Network ID
 
-    def __init__(self, lengths_per_link: tuple = (L_MAX,), lanes_per_link: tuple = (1,)) -> None:
+    def __init__(
+        self, lengths_per_link: tuple = (L_MAX,), lanes_per_link: tuple = (1,)
+    ) -> None:
         self.idx = next(self.__class__.__idx)
         tuple_links = tuple(
-            TrafficLink(length, lanes) for length, lanes in zip(lengths_per_link, lanes_per_link)
+            TrafficLink(length, lanes)
+            for length, lanes in zip(lengths_per_link, lanes_per_link)
         )
         self.__links = {lk.idx: lk for lk in tuple_links}
         self.__lro = {lk.idx: lk.lane_order for lk in self.__links.values()}

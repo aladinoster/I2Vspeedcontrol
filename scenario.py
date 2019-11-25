@@ -2,9 +2,9 @@
     Define a scenario
 """
 
-# ===============================================================================
+# ==============================================================================
 # Imports
-# ===============================================================================
+# ==============================================================================
 
 import numpy as np
 
@@ -14,9 +14,9 @@ from demand import TrafficDemand, Demand
 from carfollow import K_X, W_I, U_I
 from carfollow import Tampere
 
-# ===============================================================================
+# ==============================================================================
 # Constants
-# ===============================================================================
+# ==============================================================================
 
 C = U_I * W_I * K_X / (U_I + W_I) * 3600  # veh /h
 T_SIM = 720
@@ -27,9 +27,9 @@ np.random.seed(42)  # Reproducibility MPR
 # Initializing vehicles
 Tampere.reset()
 
-# ===============================================================================
+# ==============================================================================
 # Defaults
-# ===============================================================================
+# ==============================================================================
 
 # Traffic Network
 trf_net = {"lengths_per_link": (20000, 10000), "lanes_per_link": (1, 2)}
@@ -43,13 +43,18 @@ trf_dmd = {"lks": (1,), "demands": (demands, demands)}
 traffic_demand = TrafficDemand(**trf_dmd)
 
 
-# ===============================================================================
+# ==============================================================================
 # Classes
-# ===============================================================================
+# ==============================================================================
 
 
 class Scenario:
-    def __init__(self, traffic_network=traffic_network, traffic_demand=traffic_demand, mpr=MPR):
+    def __init__(
+        self,
+        traffic_network=traffic_network,
+        traffic_demand=traffic_demand,
+        mpr=MPR,
+    ):
         self.network = traffic_network
         self.demand = traffic_demand
         self.mpr = mpr
@@ -75,10 +80,14 @@ class Scenario:
             Tampere.lid, Tampere.lid + N - 1, int(N * self.mpr)
         )  # Id Connected Vehicles
         d_class = {k: "CAV" for k in id_cav}
-        v_class = tuple(d_class.get(i, "HDV") for i in range(N))  # All vehicle types
+        v_class = tuple(
+            d_class.get(i, "HDV") for i in range(N)
+        )  # All vehicle types
         return v_class
 
-    def get_ic_vehicles_per_lane(self, X_0: np.array, V_0: np.array, V_class: tuple, link: int):
+    def get_ic_vehicles_per_lane(
+        self, X_0: np.array, V_0: np.array, V_class: tuple, link: int
+    ):
         """ Retrieve intial condition vehicle state per lane"""
         n_lanes = len(self.network[link])
         veh_0 = {}
@@ -95,7 +104,9 @@ class Scenario:
 
             # Iterate over all vehicles
             for x, v, vtype in zip(*veh_0[ln]):
-                self.network[link][ln].veh_list.append(Tampere(x0=x, v0=v, l0=ln, veh_type=vtype))
+                self.network[link][ln].veh_list.append(
+                    Tampere(x0=x, v0=v, l0=ln, veh_type=vtype)
+                )
 
             N_veh_lane = len(self.network[link][ln].veh_list)
 
