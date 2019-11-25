@@ -90,12 +90,12 @@ def plot_var(data_frame, variable, x_label, fnt_size={"fontsize": 16}):
     ax[0].set_xlabel("Flow [veh/h]", fontdict=fnt_size)
     ax[0].set_ylabel(x_label, fontdict=fnt_size)
     ax[0].set_title(f"Distance {d1} [m]", fontdict=fnt_size)
-    ax[0].legend(["0 \%","10 \%","20 \%","30 \%","40 \%"])
+    ax[0].legend([r"0 \%", r"10 \%", r"20 \%", r"30 \%", r"40 \%"])
 
     ax[1].set_xlabel("Flow [veh/h]", fontdict=fnt_size)
     ax[1].set_ylabel(x_label, fontdict=fnt_size)
     ax[1].set_title(f"Distance {d2} [m]", fontdict=fnt_size)
-    ax[1].legend(["0 \%","10 \%","20 \%","30 \%","40 \%"])    
+    ax[1].legend([r"0 \%", r"10 \%", r"20 \%", r"30 \%", r"40 \%"])
 
     return fig, ax
 
