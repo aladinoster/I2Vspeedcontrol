@@ -24,7 +24,7 @@ The following not is oriented to reproduce and simulate some effects of sending 
 Download this repository
 
 ```{bash}
-git clone https://github.com/aladinoster/wave-congestion-absorption.git
+git clone https://github.com/aladinoster/infra_to_vehicle_speed_msg.git
 ```
 
 Be sure to get [conda](https://www.anaconda.com/distribution/), then:
@@ -42,4 +42,4 @@ The code here contained is licensed under [MIT License](LICENSE)
 
 ## Contact 
 
-If you run into problems or bugs, please let us know by [creating an issue](https://github.com/aladinoster/wave-congestion-absorption/issues/new) an issue in this repository.
+If you run into problems or bugs, please let us know by [creating an issue](https://github.com/aladinoster/infra_to_vehicle_speed_msg/issues/new) an issue in this repository.
